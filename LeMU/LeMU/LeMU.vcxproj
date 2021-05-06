@@ -86,12 +86,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Device.cpp" />
     <ClCompile Include="src\Pipeline.cpp" />
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Device.hpp" />
     <ClInclude Include="src\Pipeline.hpp" />
     <ClInclude Include="src\App.hpp" />
     <ClInclude Include="src\window.hpp" />
