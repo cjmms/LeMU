@@ -16,7 +16,7 @@ public:
 
 	// no copy constructor since we are using pointer
 	Window(const Window&) = delete;
-	// no assignment contructor
+	// no assignment contructor also, same reason
 	Window& operator=(const Window&) = delete;
 
 private:

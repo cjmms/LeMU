@@ -1,6 +1,7 @@
 #pragma once
 
 #include "window.hpp"
+#include "Pipeline.hpp"
 
 
 namespace LeMU
@@ -15,7 +16,8 @@ namespace LeMU
 		void run();
 	private:
 		Window window{ WIDTH, HEIGHT, "Hello Vulkan" };
-
+		Pipeline pipeline { "shaders/simple_shader.vert.spv",
+							"shaders/simple_shader.frag.spv" };
 	};
 
 
