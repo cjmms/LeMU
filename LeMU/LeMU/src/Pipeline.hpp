@@ -33,7 +33,7 @@ namespace LeMU
 			const std::string& fragFilePath, 
 			const PipelineConfigInfo configInfo );
 
-		~Pipeline(){}
+		~Pipeline();
 
 		Pipeline(const Pipeline&) = delete;
 		void operator=(const Pipeline&) = delete;

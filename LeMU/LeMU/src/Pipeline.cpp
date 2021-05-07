@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <vector>
+#include <assert.h>
 
 namespace LeMU
 {
@@ -14,6 +15,20 @@ namespace LeMU
 	{
 		CreateGraphicPipeline(vertFilePath, fragFilePath, configInfo);
 	}
+
+
+
+	Pipeline::~Pipeline()
+	{
+		vkDestroyShaderModule(device.device(), vertShaderModule, nullptr);
+		vkDestroyShaderModule(device.device(), fragShaderModule, nullptr);
+		vkDestroyPipeline(device.device(), graphicsPipeline, nullptr);
+	}
+
+
+
+
+
 
 	std::vector<char> Pipeline::ReadFile(const std::string& filePath)
 	{
@@ -32,11 +47,21 @@ namespace LeMU
 	}
 
 
+
+
+
 	void Pipeline::CreateGraphicPipeline(
 		const std::string& vertFilePath, 
 		const std::string& fragFilePath, 
 		const PipelineConfigInfo configInfo)
 	{
+		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && 
+			"Cannot create graphics pipeline: no pipeline layout provided in configInfo");
+
+		assert(configInfo.renderPass != VK_NULL_HANDLE &&
+			"Cannot create graphics pipeline: no renderpass provided in configInfo");
+
+
 		auto vertCode = ReadFile(vertFilePath);
 		auto fragCode = ReadFile(fragFilePath);
 
@@ -57,14 +82,49 @@ namespace LeMU
 		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		shaderStages[1].module = fragShaderModule;
-		shaderStages[0].pName = "main";
-		shaderStages[0].flags = 0;
-		shaderStages[0].pNext = nullptr;
-		shaderStages[0].pSpecializationInfo = nullptr;
+		shaderStages[1].pName = "main";
+		shaderStages[1].flags = 0;
+		shaderStages[1].pNext = nullptr;
+		shaderStages[1].pSpecializationInfo = nullptr;
 
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		vertexInputInfo.vertexAttributeDescriptionCount = 0;	// hard code data into the shader
+		vertexInputInfo.vertexBindingDescriptionCount = 0;
+		vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+		vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
+		VkGraphicsPipelineCreateInfo pipelineInfo{};
+		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineInfo.stageCount = 2;
+		pipelineInfo.pStages = shaderStages;
+		pipelineInfo.pVertexInputState = &vertexInputInfo;
+		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
+		pipelineInfo.pViewportState = &configInfo.viewportInfo;
+		pipelineInfo.pRasterizationState = &configInfo.raterizationInfo;
+		pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
+		pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
+		pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
+		pipelineInfo.pDynamicState = nullptr;
+
+		pipelineInfo.layout = configInfo.pipelineLayout;
+		pipelineInfo.renderPass = configInfo.renderPass;
+		pipelineInfo.subpass = configInfo.subpass;
+
+		pipelineInfo.basePipelineIndex = -1;
+		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+		if (vkCreateGraphicsPipelines(
+			device.device(),
+			VK_NULL_HANDLE,
+			1,
+			&pipelineInfo,
+			nullptr,
+			&graphicsPipeline) != VK_SUCCESS)
+		{
+			throw  std::runtime_error("Failed to create Graphics Pipeline.");
+		}
 
 
 		std::cout << "Vertex Shader Code Size: " << vertCode.size() << std::endl;
