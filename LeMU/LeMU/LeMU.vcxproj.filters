@@ -30,6 +30,9 @@
     <ClCompile Include="src\Device.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\SwapChain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\window.hpp">
@@ -42,6 +45,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Device.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SwapChain.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

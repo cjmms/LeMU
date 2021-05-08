@@ -11,7 +11,6 @@ namespace LeMU
 	struct PipelineConfigInfo {
 		VkViewport viewport;
 		VkRect2D scissor;
-		VkPipelineViewportStateCreateInfo viewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo raterizationInfo;
 		VkPipelineMultisampleStateCreateInfo multisampleInfo;

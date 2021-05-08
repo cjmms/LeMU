@@ -3,6 +3,7 @@
 #include "window.hpp"
 #include "Pipeline.hpp"
 #include "Device.hpp"
+#include "SwapChain.hpp"
 
 namespace LeMU
 {
@@ -17,6 +18,7 @@ namespace LeMU
 	private:
 		Window window{ WIDTH, HEIGHT, "Hello Vulkan" };
 		Device device{window};
+		SwapChain swapChain{ device, window.getExtent() };
 		Pipeline pipeline{
 			device,
 			"shaders/simple_shader.vert.spv",

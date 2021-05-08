@@ -91,12 +91,14 @@
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\window.cpp" />
+    <ClCompile Include="src\SwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Device.hpp" />
     <ClInclude Include="src\Pipeline.hpp" />
     <ClInclude Include="src\App.hpp" />
     <ClInclude Include="src\window.hpp" />
+    <ClInclude Include="src\SwapChain.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="compile.bat" />
