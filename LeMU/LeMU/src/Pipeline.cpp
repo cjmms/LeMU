@@ -28,8 +28,6 @@ namespace LeMU
 
 
 
-
-
 	std::vector<char> Pipeline::ReadFile(const std::string& filePath)
 	{
 		std::ifstream file{filePath, std::ios::ate | std::ios::binary};
@@ -45,7 +43,6 @@ namespace LeMU
 		file.close();
 		return buffer;
 	}
-
 
 
 
@@ -255,4 +252,14 @@ namespace LeMU
 	}
 
 
+
+	void Pipeline::bind(VkCommandBuffer commandBuffer)
+	{
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+
+	}
+
 }
+
+
