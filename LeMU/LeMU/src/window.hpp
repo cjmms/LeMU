@@ -4,36 +4,28 @@
 #include <GLFW/glfw3.h>
 
 #include <string>
-
 namespace LeMU {
 
-class Window {
-public:
-	Window(int w, int h, std::string name);
-	~Window();
+	class Window {
+	public:
+		Window(int w, int h, std::string name);
+		~Window();
 
-	// no copy constructor since we are using pointer
-	Window(const Window&) = delete;
-	// no assignment contructor also, same reason
-	Window& operator=(const Window&) = delete;
+		Window(const Window&) = delete;
+		Window& operator=(const Window&) = delete;
 
-	bool ShouldClose();
-	VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
+		bool shouldClose() { return glfwWindowShouldClose(window); }
+		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
 
-	void CreateWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
-private:
-	void InitWindow();
+	private:
+		void initWindow();
 
+		const int width;
+		const int height;
 
-	GLFWwindow* window;
-
-	const int width;
-	const int height;
-
-	std::string name;
-
-
-};
-
-}
+		std::string windowName;
+		GLFWwindow* window;
+	};
+}  

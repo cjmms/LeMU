@@ -49,10 +49,10 @@ namespace LeMU {
 
     // class member functions
     Device::Device(Window& window) : window{ window } {
-        createInstance();               // create a Vulkan instance
-        setupDebugMessenger();          // setup validation layer
-        createSurface();                // create surface using GLFW  
-        pickPhysicalDevice();           // find the GPU that Vulkan support(only 1 GPU in this case)
+        createInstance();
+        setupDebugMessenger();
+        createSurface();
+        pickPhysicalDevice();
         createLogicalDevice();
         createCommandPool();
     }
@@ -196,7 +196,7 @@ namespace LeMU {
         }
     }
 
-    void Device::createSurface() { window.CreateWindowSurface(instance, &surface_); }
+    void Device::createSurface() { window.createWindowSurface(instance, &surface_); }
 
     bool Device::isDeviceSuitable(VkPhysicalDevice device) {
         QueueFamilyIndices indices = findQueueFamilies(device);
@@ -216,11 +216,11 @@ namespace LeMU {
             supportedFeatures.samplerAnisotropy;
     }
 
-    void Device::populateDebugMessengerCreateInfo(
-        VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+    void Device::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |

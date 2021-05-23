@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "Device.hpp"
 
 // vulkan headers
 #include <vulkan/vulkan.h>
@@ -8,8 +8,6 @@
 // std lib headers
 #include <string>
 #include <vector>
-
-#include "Device.hpp"
 
 namespace LeMU {
 
@@ -79,4 +77,4 @@ namespace LeMU {
         size_t currentFrame = 0;
     };
 
-}  
+}  // namespace lve

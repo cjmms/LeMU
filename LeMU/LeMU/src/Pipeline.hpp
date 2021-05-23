@@ -1,62 +1,61 @@
 #pragma once
 
-#include <vector>
-#include <iostream>
-#include <string>
 #include "Device.hpp"
 
+// std
+#include <string>
+#include <vector>
 
-namespace LeMU
-{
-	struct PipelineConfigInfo {
-		VkViewport viewport;
-		VkRect2D scissor;
-		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
-		VkPipelineRasterizationStateCreateInfo raterizationInfo;
-		VkPipelineMultisampleStateCreateInfo multisampleInfo;
-		VkPipelineColorBlendAttachmentState colorBlendAttachment;
-		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
-		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
-		VkPipelineLayout pipelineLayout = nullptr;
-		VkRenderPass renderPass = nullptr;
-		uint32_t subpass = 0;
-	};
-	 
+namespace LeMU {
 
-	class Pipeline
-	{
-	public:
-		Pipeline(
-			Device& device, 
-			const std::string& vertFilePath, 
-			const std::string& fragFilePath, 
-			const PipelineConfigInfo configInfo );
+    struct PipelineConfigInfo {
+        PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
 
-		~Pipeline();
+        VkViewport viewport;
+        VkRect2D scissor;
+        VkPipelineViewportStateCreateInfo viewportInfo;
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+        VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+        VkPipelineMultisampleStateCreateInfo multisampleInfo;
+        VkPipelineColorBlendAttachmentState colorBlendAttachment;
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+        VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+        VkPipelineLayout pipelineLayout = nullptr;
+        VkRenderPass renderPass = nullptr;
+        uint32_t subpass = 0;
+    };
 
-		Pipeline(const Pipeline&) = delete;
-		void operator=(const Pipeline&) = delete;
+    class Pipeline {
+    public:
+        Pipeline(
+            Device& device,
+            const std::string& vertFilepath,
+            const std::string& fragFilepath,
+            const PipelineConfigInfo& configInfo);
+        ~Pipeline();
 
-		void bind(VkCommandBuffer commandBuffer);
+        Pipeline(const Pipeline&) = delete;
+        void operator=(const Pipeline&) = delete;
 
-		static PipelineConfigInfo DefaultPipelineConfigInfo(uint32_t width, uint32_t height);
+        void bind(VkCommandBuffer commandBuffer);
 
-	private:
-		static std::vector<char> ReadFile(const std::string& filePath);
+        static void defaultPipelineConfigInfo(
+            PipelineConfigInfo& configInfo, uint32_t width, uint32_t height);
 
+    private:
+        static std::vector<char> readFile(const std::string& filepath);
 
-		void CreateGraphicPipeline(
-			const std::string& vertFilePath, 
-			const std::string& fragFilePath, 
-			const PipelineConfigInfo configInfo);
+        void createGraphicsPipeline(
+            const std::string& vertFilepath,
+            const std::string& fragFilepath,
+            const PipelineConfigInfo& configInfo);
 
-		void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+        void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-		Device& device;
-		VkPipeline graphicsPipeline;
-		VkShaderModule vertShaderModule;
-		VkShaderModule fragShaderModule;
-	};
-
-}
-
+        Device& device;
+        VkPipeline graphicsPipeline;
+        VkShaderModule vertShaderModule;
+        VkShaderModule fragShaderModule;
+    };
+}  // namespace lve

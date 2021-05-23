@@ -1,78 +1,77 @@
 #include "SwapChain.hpp"
-#include <stdexcept>
-#include <iostream>
+
+// std
 #include <array>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <limits>
+#include <set>
+#include <stdexcept>
 
-namespace LeMU
-{
-	SwapChain::SwapChain(Device& deviceRef, VkExtent2D extent)
-		: device{ deviceRef }, windowExtent{ extent } {
-		createSwapChain();
-		createImageViews();
-		createRenderPass();
-		createDepthResources();
-		createFramebuffers();
-		createSyncObjects();
-	}
+namespace LeMU {
 
+    SwapChain::SwapChain(Device& deviceRef, VkExtent2D extent)
+        : device{ deviceRef }, windowExtent{ extent } {
+        createSwapChain();
+        createImageViews();
+        createRenderPass();
+        createDepthResources();
+        createFramebuffers();
+        createSyncObjects();
+    }
 
+    SwapChain::~SwapChain() {
+        for (auto imageView : swapChainImageViews) {
+            vkDestroyImageView(device.device(), imageView, nullptr);
+        }
+        swapChainImageViews.clear();
 
+        if (swapChain != nullptr) {
+            vkDestroySwapchainKHR(device.device(), swapChain, nullptr);
+            swapChain = nullptr;
+        }
 
-	SwapChain::~SwapChain() {
-		for (auto imageView : swapChainImageViews) {
-			vkDestroyImageView(device.device(), imageView, nullptr);
-		}
-		swapChainImageViews.clear();
+        for (int i = 0; i < depthImages.size(); i++) {
+            vkDestroyImageView(device.device(), depthImageViews[i], nullptr);
+            vkDestroyImage(device.device(), depthImages[i], nullptr);
+            vkFreeMemory(device.device(), depthImageMemorys[i], nullptr);
+        }
 
-		if (swapChain != nullptr) {
-			vkDestroySwapchainKHR(device.device(), swapChain, nullptr);
-			swapChain = nullptr;
-		}
+        for (auto framebuffer : swapChainFramebuffers) {
+            vkDestroyFramebuffer(device.device(), framebuffer, nullptr);
+        }
 
-		for (int i = 0; i < depthImages.size(); i++) {
-			vkDestroyImageView(device.device(), depthImageViews[i], nullptr);
-			vkDestroyImage(device.device(), depthImages[i], nullptr);
-			vkFreeMemory(device.device(), depthImageMemorys[i], nullptr);
-		}
+        vkDestroyRenderPass(device.device(), renderPass, nullptr);
 
-		for (auto framebuffer : swapChainFramebuffers) {
-			vkDestroyFramebuffer(device.device(), framebuffer, nullptr);
-		}
+        // cleanup synchronization objects
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(device.device(), renderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(device.device(), imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(device.device(), inFlightFences[i], nullptr);
+        }
+    }
 
-		vkDestroyRenderPass(device.device(), renderPass, nullptr);
+    VkResult SwapChain::acquireNextImage(uint32_t* imageIndex) {
+        vkWaitForFences(
+            device.device(),
+            1,
+            &inFlightFences[currentFrame],
+            VK_TRUE,
+            std::numeric_limits<uint64_t>::max());
 
-		// cleanup synchronization objects
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			vkDestroySemaphore(device.device(), renderFinishedSemaphores[i], nullptr);
-			vkDestroySemaphore(device.device(), imageAvailableSemaphores[i], nullptr);
-			vkDestroyFence(device.device(), inFlightFences[i], nullptr);
-		}
-	}
+        VkResult result = vkAcquireNextImageKHR(
+            device.device(),
+            swapChain,
+            std::numeric_limits<uint64_t>::max(),
+            imageAvailableSemaphores[currentFrame],  // must be a not signaled semaphore
+            VK_NULL_HANDLE,
+            imageIndex);
 
+        return result;
+    }
 
-
-	VkResult SwapChain::acquireNextImage(uint32_t* imageIndex) {
-		vkWaitForFences(
-			device.device(),
-			1,
-			&inFlightFences[currentFrame],
-			VK_TRUE,
-			std::numeric_limits<uint64_t>::max());
-
-		VkResult result = vkAcquireNextImageKHR(
-			device.device(),
-			swapChain,
-			std::numeric_limits<uint64_t>::max(),
-			imageAvailableSemaphores[currentFrame],  // must be a not signaled semaphore
-			VK_NULL_HANDLE,
-			imageIndex);
-
-		return result;
-	}
-
-
-    VkResult SwapChain::submitCommandBuffers(
-        const VkCommandBuffer* buffers, uint32_t* imageIndex) {
+    VkResult SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) {
         if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
             vkWaitForFences(device.device(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
@@ -238,15 +237,13 @@ namespace LeMU
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
         VkSubpassDependency dependency = {};
+
+        dependency.dstSubpass = 0;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         dependency.srcAccessMask = 0;
-        dependency.srcStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstSubpass = 0;
-        dependency.dstStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstAccessMask =
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
         std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
         VkRenderPassCreateInfo renderPassInfo = {};
@@ -416,11 +413,4 @@ namespace LeMU
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
     }
 
-
-
-
-
-
-
-
-}
+}  // namespace lve

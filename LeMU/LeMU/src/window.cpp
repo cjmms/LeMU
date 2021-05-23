@@ -1,54 +1,30 @@
 #include "window.hpp"
+
+// std
 #include <stdexcept>
 
-namespace LeMU
-{
-	Window::Window(int w, int h, std::string name)
-		: width(h), height(h), name(name) 
-	{
-		InitWindow();
-	}
+namespace LeMU {
 
+    Window::Window(int w, int h, std::string name) : width{ w }, height{ h }, windowName{ name } {
+        initWindow();
+    }
 
-	Window::~Window()
-	{
-		glfwDestroyWindow(window);
-		glfwTerminate();
-	}
+    Window::~Window() {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+    }
 
-	
-	void Window::InitWindow()
-	{
-		glfwInit();
+    void Window::initWindow() {
+        glfwInit();
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		// Do not create OpenGL content when GLFW get init
-		// since this application is using Vulkan
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+    }
 
-		// Dsiable GLFW default resize
-		// gonna deal with resize later in other way
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-		window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
-	}
-
-
-
-	bool Window::ShouldClose()
-	{
-		return glfwWindowShouldClose(window);
-	}
-
-
-	void Window::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
-	{
-		if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create window surface");
-		}
-
-
-	}
-
-
-}
+    void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
+        if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+            throw std::runtime_error("failed to craete window surface");
+        }
+    }
+}  // namespace 
