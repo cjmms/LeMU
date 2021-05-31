@@ -14,16 +14,21 @@ namespace LeMU {
 		Window(const Window&) = delete;
 		Window& operator=(const Window&) = delete;
 
-		bool shouldClose() { return glfwWindowShouldClose(window); }
-		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
+		inline bool shouldClose() { return glfwWindowShouldClose(window); }
+		inline VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
+		inline bool wasWindowResized() { return framebufferResized; }
+		inline void resetWindowResizeFlag() { framebufferResized = false; }
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 	private:
+		static void frameBufferResizedCallback(GLFWwindow *window, int width, int height);
 		void initWindow();
 
-		const int width;
-		const int height;
+		int width;
+		int height;
+
+		bool framebufferResized = false;
 
 		std::string windowName;
 		GLFWwindow* window;
