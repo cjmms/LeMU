@@ -38,7 +38,11 @@ namespace LeMU {
         }
     }
 
-    void FirstApp::createPipeline() {
+    void FirstApp::createPipeline() 
+    {
+        assert(swapChain != nullptr && "Cannot create pipeline before swap chain");
+        assert(swapChain != nullptr && "Cannot create pipeline before pipeline layout");
+
         PipelineConfigInfo pipelineConfig{};
         Pipeline::defaultPipelineConfigInfo(pipelineConfig);
         pipelineConfig.renderPass = swapChain->getRenderPass();
@@ -62,8 +66,20 @@ namespace LeMU {
         }
 
         vkDeviceWaitIdle(device.device());  // pause device before SwapChain recreation
-        swapChain = nullptr;
-        swapChain = std::make_unique<SwapChain>(device, extent);    // recreate swapchain
+        
+        if (swapChain == nullptr)
+        {
+            swapChain = std::make_unique<SwapChain>(device, extent);
+        }
+        else
+        {
+            swapChain = std::make_unique<SwapChain>(device, extent, std::move(swapChain));
+            if (swapChain->imageCount() != commandBuffers.size())
+            {
+                freeCommandBuffers();
+                createCommandBuffers();
+            }
+        }
         createPipeline();
     }
 
@@ -88,6 +104,19 @@ namespace LeMU {
 
         
     }
+
+
+    void FirstApp::freeCommandBuffers()
+    {
+        vkFreeCommandBuffers(
+            device.device(), 
+            device.getCommandPool(), 
+            static_cast<uint32_t>(commandBuffers.size()), 
+            commandBuffers.data());
+
+        commandBuffers.clear();
+    }
+
 
 
     void FirstApp::recordCommandBuffer(int imageIndex)
