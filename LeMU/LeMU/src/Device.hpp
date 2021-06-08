@@ -76,6 +76,8 @@ namespace LeMU {
         void createInstance();
         void setupDebugMessenger();
         void createSurface();
+
+        // select a graphic card in the system that supports the features we need
         void pickPhysicalDevice();
         void createLogicalDevice();
         void createCommandPool();
@@ -94,6 +96,9 @@ namespace LeMU {
 
         VkInstance instance;
         VkDebugUtilsMessengerEXT debugMessenger;
+
+        // the graphics card that get selected will be in this device
+        // this device will be destoryed when VkInstance get destoryed implicitly
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         Window& window;
         VkCommandPool commandPool;
