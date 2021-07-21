@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Device.cpp" />
+    <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Pipeline.cpp" />
     <ClCompile Include="src\App.cpp" />
@@ -96,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Device.hpp" />
+    <ClInclude Include="src\GameObject.hpp" />
     <ClInclude Include="src\Model.hpp" />
     <ClInclude Include="src\Pipeline.hpp" />
     <ClInclude Include="src\App.hpp" />

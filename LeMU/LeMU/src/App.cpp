@@ -16,6 +16,7 @@ namespace LeMU {
 
     struct SimplePushConstantData
     {
+        glm::mat2 transform{1.f};   // default identity matrix as transformation matrix
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
@@ -24,7 +25,7 @@ namespace LeMU {
 
 
     FirstApp::FirstApp() {
-        loadModels();
+        loadGameObjects();
         createPipelineLayout();
         recreateSwapChain();
         createCommandBuffers();
@@ -178,28 +179,7 @@ namespace LeMU {
         vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
         vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-        pipeline->bind(commandBuffers[imageIndex]);
-        model->bind(commandBuffers[imageIndex]);
-
-        // update constant data into command buffer and draw objects
-        for (int j = 0; j < 4; j++)
-        {
-            SimplePushConstantData push{};
-            push.offset = {0.0f, -0.4f + j * 0.25f};
-            push.color = {0.0f, 0.0f, 0.2f + 0.2f * j};
-
-            vkCmdPushConstants(
-                commandBuffers[imageIndex],
-                pipelineLayout,
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                0,
-                sizeof(SimplePushConstantData),
-                &push);
-
-            model->draw(commandBuffers[imageIndex]);
-        }
-
-
+        renderGameObjects(commandBuffers[imageIndex]);
 
         vkCmdEndRenderPass(commandBuffers[imageIndex]);
         if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
@@ -240,7 +220,7 @@ namespace LeMU {
 
 
 
-    void FirstApp::loadModels()
+    void FirstApp::loadGameObjects()
     {
         std::vector<Model::Vertex> vertices
         {
@@ -249,7 +229,46 @@ namespace LeMU {
             { {-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f} }
         };
 
-        model = std::make_unique<Model>(device, vertices);
+        auto model = std::make_shared<Model>(device, vertices);
+
+        auto triangle = GameObject::createGameObject();
+        triangle.model = model;
+        triangle.color = { 0.1f, 0.8f, 0.1f };
+        triangle.transform2D.translation.x = 0.2f;
+
+        gameObjects.push_back(std::move(triangle));
     }
 
+
+    void FirstApp::renderGameObjects(VkCommandBuffer commandBuffer)
+    {
+        pipeline->bind(commandBuffer);
+
+        for (auto& obj: gameObjects)
+        {
+            SimplePushConstantData push{};
+            push.offset = obj.transform2D.translation;
+            push.color = obj.color;
+            push.transform = obj.transform2D.mat2();
+
+            vkCmdPushConstants(
+                commandBuffer,
+                pipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0,
+                sizeof(SimplePushConstantData),
+                &push);
+
+            obj.model->bind(commandBuffer);
+            obj.model->draw(commandBuffer);
+        }
+
+    }
+
+
+
 }  // namespace lve
+
+
+
+
