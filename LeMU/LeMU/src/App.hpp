@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Device.hpp"
-#include "Pipeline.hpp"
+
 #include "Renderer.hpp"
 #include "window.hpp"
 #include "GameObject.hpp"
@@ -26,16 +26,11 @@ namespace LeMU {
 
 	private:
 		void loadGameObjects();
-		void createPipelineLayout();
-		void createPipeline();
-		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		Window window{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		Device device{ window };
 		Renderer renderer{window, device};
-
-		std::unique_ptr<Pipeline> pipeline;
-		VkPipelineLayout pipelineLayout;
+	
 		std::vector<GameObject> gameObjects;
 
 	};
