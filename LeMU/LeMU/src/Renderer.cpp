@@ -13,7 +13,7 @@ namespace LeMU {
 	VkCommandBuffer Renderer::getCurrentCommandBuffer() const 
 	{ 
 		assert(isFrameStarted && "Cannot get command buffer when frame not in progress");
-		return commandBuffers[currentImageIndex]; 
+		return commandBuffers[currentFrameIndex]; 
 	}
 
     Renderer::Renderer(Window &window, Device &device) 
@@ -44,19 +44,26 @@ namespace LeMU {
         }
         else
         {
-            swapChain = std::make_unique<SwapChain>(device, extent, std::move(swapChain));
-            if (swapChain->imageCount() != commandBuffers.size())
-            {
-                freeCommandBuffers();
-                createCommandBuffers();
-            }
-        }
-        
+            // acquire old swapchain
+            std::shared_ptr<SwapChain> oldSwapChain = std::move(swapChain);
+            swapChain = std::make_unique<SwapChain>(device, extent, oldSwapChain);
+
+            if (!oldSwapChain->compareSwapFormats(*swapChain.get()))
+                throw std::runtime_error("Swap chain image(or depth) format has changed!");
+        } 
+    }
+
+
+
+    int Renderer::getFrameIndex() const
+    {
+        assert(isFrameStarted && "Cannot get frame index when frame not in progress");
+        return currentFrameIndex;
     }
 
 
     void Renderer::createCommandBuffers() {
-        commandBuffers.resize(swapChain->imageCount());
+        commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -135,6 +142,7 @@ namespace LeMU {
             throw std::runtime_error("failed to present swap chain image!");
         
         isFrameStarted = false;
+        currentFrameIndex = (currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
 

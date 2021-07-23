@@ -25,6 +25,8 @@ namespace LeMU {
 
 		VkCommandBuffer getCurrentCommandBuffer() const;
 
+		int getFrameIndex() const;
+
 		// acquire next image, begin command buffer
 		VkCommandBuffer beginFrame();
 		
@@ -48,6 +50,7 @@ namespace LeMU {
 
 		// keep track of current frame
 		uint32_t currentImageIndex;
+		int currentFrameIndex;
 		bool isFrameStarted;
 	};
 }  // namespace lve
