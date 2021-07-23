@@ -9,9 +9,11 @@ namespace LeMU
 {
 	struct Transform2DComponent
 	{
-		glm::vec2 translation;
+		glm::vec2 translation{};
+		glm::vec2 scale{1.f, 1.f};
+		float rotation;				// radians
 
-		glm::mat2 mat2() { return glm::mat2{ 1.0f }; }
+		glm::mat2 mat2();
 	};
 
 

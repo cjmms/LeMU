@@ -5,6 +5,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm.hpp>
+#include <gtc/constants.hpp>
 
 
 // std
@@ -235,6 +236,8 @@ namespace LeMU {
         triangle.model = model;
         triangle.color = { 0.1f, 0.8f, 0.1f };
         triangle.transform2D.translation.x = 0.2f;
+        triangle.transform2D.scale = { 2.0f, 0.5f };
+        triangle.transform2D.rotation = 0.25f * glm::two_pi<float>();   // radians, 90 degree
 
         gameObjects.push_back(std::move(triangle));
     }
