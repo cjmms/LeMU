@@ -26,7 +26,6 @@ namespace LeMU {
 
 		void createPipelineLayout();
 		void createPipeline(VkRenderPass renderPass);
-		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		Device &device;
 

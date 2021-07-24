@@ -1,5 +1,7 @@
 #include "GameObject.hpp"
 
+#include <gtc/matrix_transform.hpp>
+
 namespace LeMU
 {
 
@@ -10,16 +12,18 @@ namespace LeMU
 		return GameObject{ currentID++ };
 	}
 
-	glm::mat2 Transform2DComponent::mat2() 
+	glm::mat4 TransformComponent::mat4() 
 	{ 
-		const float sinRotation = glm::sin(rotation);
-		const float cosRotation = glm::cos(rotation);
-		// TODO:: replaced with Quaternion
-		glm::mat2 rotateMat{ {cosRotation, sinRotation}, {-sinRotation, cosRotation} };
+		auto transform = glm::translate(glm::mat4{1.0f}, translation);
 
-		glm::mat2 scaleMat{ {scale.x, 0}, {0, scale.y} };
+		// rotate rotation.y radians along with y axis
+		transform = glm::rotate(transform, rotation.y, { 0.0f, 1.0f, 0.0f });
+		transform = glm::rotate(transform, rotation.x, { 1.0f, 0.0f, 0.0f });
+		transform = glm::rotate(transform, rotation.z, { 0.0f, 0.0f, 1.0f });
 
-		return rotateMat * scaleMat; 
+		transform = glm::scale(transform, scale);
+
+		return transform;
 	}
 
 }

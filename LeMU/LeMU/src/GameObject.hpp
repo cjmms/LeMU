@@ -7,13 +7,15 @@
 
 namespace LeMU
 {
-	struct Transform2DComponent
+	struct TransformComponent
 	{
-		glm::vec2 translation{};
-		glm::vec2 scale{1.f, 1.f};
-		float rotation;				// radians
+		glm::vec3 translation{};
+		glm::vec3 scale{1.0f, 1.0f, 1.0f};
+		glm::vec3 rotation;				// radians
 
-		glm::mat2 mat2();
+		// Translation * Ry * Rx * Rz * Scale transformation
+		// Rotation convention uses tait-bryan angles with axis order Y, X, Z
+		glm::mat4 mat4();
 	};
 
 
@@ -38,7 +40,7 @@ namespace LeMU
 
 			std::shared_ptr<Model> model{};
 			glm::vec3 color{};
-			Transform2DComponent transform2D{};
+			TransformComponent transform{};
 
 		private:
 			GameObject(id_t objectID) :id(objectID){}	// private constructor, make sure id is unique
