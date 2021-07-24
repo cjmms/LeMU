@@ -23,6 +23,8 @@ namespace LeMU {
 		inline VkRenderPass getSwapChainRenderPass() const { return swapChain->getRenderPass(); }
 		inline bool isFrameInProgress()const { return isFrameStarted; };
 
+		inline float getAspectRatio() const { return swapChain->extentAspectRatio(); }
+
 		VkCommandBuffer getCurrentCommandBuffer() const;
 
 		int getFrameIndex() const;
