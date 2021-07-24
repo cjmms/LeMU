@@ -70,7 +70,9 @@ namespace LeMU {
 
 
 
-    void RenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects)
+    void RenderSystem::renderGameObjects( VkCommandBuffer commandBuffer, 
+                                          std::vector<GameObject>& gameObjects, 
+                                          const Camera& camera )
     {
         pipeline->bind(commandBuffer);
 
@@ -80,7 +82,7 @@ namespace LeMU {
 
             SimplePushConstantData push{};
             push.color = obj.color;
-            push.transform = obj.transform.mat4();
+            push.transform = camera.getProjectionMatrix() * obj.transform.mat4();
 
             vkCmdPushConstants(
                 commandBuffer,

@@ -1,7 +1,7 @@
 #pragma once
 
 
-
+#include "Camera.hpp"
 #include "Device.hpp"
 #include "Pipeline.hpp"
 #include "GameObject.hpp"
@@ -20,7 +20,9 @@ namespace LeMU {
 		RenderSystem(const RenderSystem&) = delete;
 		RenderSystem& operator=(const RenderSystem&) = delete;
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects);
+		void renderGameObjects( VkCommandBuffer commandBuffer, 
+								std::vector<GameObject> &gameObjects, 
+								const Camera &camera);
 
 	private:
 

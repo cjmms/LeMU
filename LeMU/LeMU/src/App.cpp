@@ -1,6 +1,8 @@
 #include "App.hpp"
 
 
+#include "Camera.hpp"
+
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -26,6 +28,8 @@ namespace LeMU {
     void FirstApp::run() {
 
         RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
+        Camera camera{};
+        camera.setOrthographicProjection(-1, 1, -1, 1, -1, 1);
 
         while (!window.shouldClose()) {
             glfwPollEvents();
@@ -34,7 +38,7 @@ namespace LeMU {
             {
                 renderer.beginSwapChainRenderPass(commandBuffer);
 
-                renderSystem.renderGameObjects(commandBuffer, gameObjects);
+                renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
 
                 renderer.endSwapChainRenderPass(commandBuffer);
                 renderer.endFrame();
