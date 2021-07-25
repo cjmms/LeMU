@@ -29,6 +29,7 @@ namespace LeMU {
 
         RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
         Camera camera{};
+        camera.setViewDirection(glm::vec3(0.0), glm::vec3(0.0f, 0.2f, 1.0f));
 
         while (!window.shouldClose()) {
             glfwPollEvents();
