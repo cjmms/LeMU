@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Model.hpp"
+#include <gtc/constants.hpp>
 
 // std
 #include <memory>

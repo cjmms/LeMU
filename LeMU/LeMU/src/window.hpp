@@ -19,6 +19,8 @@ namespace LeMU {
 		inline bool wasWindowResized() { return framebufferResized; }
 		inline void resetWindowResizeFlag() { framebufferResized = false; }
 
+		inline GLFWwindow* getGLFWwindow() const { return window; }
+
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 	private:

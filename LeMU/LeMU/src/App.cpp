@@ -1,6 +1,6 @@
 #include "App.hpp"
 
-
+#include "KeyboardController.hpp"
 #include "Camera.hpp"
 
 
@@ -12,6 +12,7 @@
 
 // std
 #include <array>
+#include <chrono>
 #include <stdexcept>
 #include <iostream>
 
@@ -27,15 +28,33 @@ namespace LeMU {
 
     void FirstApp::run() {
 
+        // render system
         RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
+        
+        // camera
         Camera camera{};
-        camera.setViewDirection(glm::vec3(0.0), glm::vec3(0.0f, 0.2f, 1.0f));
+        camera.setViewDirection(glm::vec3(0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+        auto cameraObject = GameObject::createGameObject(); // camera, used to store current state
+
+        // timer
+        auto currentTime = std::chrono::high_resolution_clock::now();
+
+        // Kayboard Controller
+        KeyboardController cameraController{};
 
         while (!window.shouldClose()) {
             glfwPollEvents();
 
+            // declear after glfwPollEvents(), because glfwPollEvents() may block game loop
+            auto newTime = std::chrono::high_resolution_clock::now();
+            float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+            currentTime = newTime;  // update current time
+
+            // update camera state
+            cameraController.moveInPlaneXZ(window.getGLFWwindow(), frameTime, cameraObject);
+            camera.setViewYXZ(cameraObject.transform.translation, cameraObject.transform.rotation);
+
             float aspect = renderer.getAspectRatio();
-            //camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
             camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
 
