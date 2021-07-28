@@ -33,19 +33,53 @@ namespace LeMU
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "Vertex count must be at least 3");
 
+		// buffer size for both vertex buffer and staging buffer
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
 
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
+		device.createBuffer(
+			bufferSize,	
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,	// Source location for memory transfer
+			// VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT: buffer is visiable to host side
+			// VK_MEMORY_PROPERTY_HOST_COHERENT_BIT: any change in host side will apply to device side
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer,
+			stagingBufferMemory );
+
+		// mapping staging buffer to host buffer
+		void* data;
+
+		// map memory on host(void *data) to device memory
+		vkMapMemory(device.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
+
+		// write index buffer data into host(void *data)
+		// meanwhile, these data will be flushed to device memory
+		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
+
+		// once all data has been writtern, 
+		// no longer need the  region of data in host side,
+		// unmap the staging buffer
+		// region on the host side will be deleted
+		vkUnmapMemory(device.device(), stagingBufferMemory);
+
+		// create vertex buffer, transfer data from staging buffer to vertex buffer
 		device.createBuffer(
 			bufferSize,
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			// not only a vertex buffer, also a transfer destination buffer(transfer from staging buffer)
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			// Local buffer inside device, not visiable and not coherent to host buffer
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			vertexBuffer,
-			vertexBufferMemory );
+			vertexBufferMemory);
 
-		void* data;
-		vkMapMemory(device.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-		vkUnmapMemory(device.device(), vertexBufferMemory);
+		// copy data from staging buffer to vertex buffer
+		device.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+		// clean staging buffer
+		vkDestroyBuffer(device.device(), stagingBuffer, nullptr);
+		vkFreeMemory(device.device(), stagingBufferMemory, nullptr);
 	}
 
 
@@ -78,7 +112,7 @@ namespace LeMU
 		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
 
 		// once all data has been writtern, 
-		// no longer need to region of data in host side,
+		// no longer need the  region of data in host side,
 		// unmap the indexBufferMemory
 		// region on the host side will be deleted
 		vkUnmapMemory(device.device(), indexBufferMemory);
@@ -91,11 +125,17 @@ namespace LeMU
 		VkBuffer buffers[] = { vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+
+		if (hasIndexBuffer)
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 
 	void Model::draw(VkCommandBuffer commandBuffer)
 	{
-		vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+		if (hasIndexBuffer)
+			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+		else
+			vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
 	}
 
 
