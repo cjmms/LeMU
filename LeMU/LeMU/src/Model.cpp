@@ -5,30 +5,23 @@
 
 namespace LeMU
 {
-
 	Model::Model(Device& device, const Builder& builder)
 		: device {device}
 	{
-		createVertexBuffers(builder.vertices);
+		createVertexBuffer(builder.vertices);
 		createIndexBuffer(builder.indices);
 	}
 
 
 	Model::~Model()
 	{
-		// destory vertex buffer
-		vkDestroyBuffer(device.device(), vertexBuffer, nullptr);
-		vkFreeMemory(device.device(), vertexBufferMemory, nullptr);
+		deleteBuffer(vertexBuffer, vertexBufferMemory);
 
-		if (hasIndexBuffer)	// destory index buffer
-		{
-			vkDestroyBuffer(device.device(), indexBuffer, nullptr);
-			vkFreeMemory(device.device(), indexBufferMemory, nullptr);
-		}
+		if (hasIndexBuffer)	deleteBuffer(indexBuffer, indexBufferMemory);
 	}
 
-
-	void Model::createVertexBuffers(const std::vector<Vertex> &vertices)
+	
+	void Model::createVertexBuffer(const std::vector<Vertex> &vertices)
 	{
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -48,21 +41,7 @@ namespace LeMU
 			stagingBuffer,
 			stagingBufferMemory );
 
-		// mapping staging buffer to host buffer
-		void* data;
-
-		// map memory on host(void *data) to device memory
-		vkMapMemory(device.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-
-		// write index buffer data into host(void *data)
-		// meanwhile, these data will be flushed to device memory
-		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-
-		// once all data has been writtern, 
-		// no longer need the  region of data in host side,
-		// unmap the staging buffer
-		// region on the host side will be deleted
-		vkUnmapMemory(device.device(), stagingBufferMemory);
+		copyHostMemToDeviceMem(stagingBufferMemory, bufferSize, vertices.data());
 
 		// create vertex buffer, transfer data from staging buffer to vertex buffer
 		device.createBuffer(
@@ -70,16 +49,13 @@ namespace LeMU
 			// not only a vertex buffer, also a transfer destination buffer(transfer from staging buffer)
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			// Local buffer inside device, not visiable and not coherent to host buffer
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,	
 			vertexBuffer,
 			vertexBufferMemory);
 
-		// copy data from staging buffer to vertex buffer
 		device.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-		// clean staging buffer
-		vkDestroyBuffer(device.device(), stagingBuffer, nullptr);
-		vkFreeMemory(device.device(), stagingBufferMemory, nullptr);
+		deleteBuffer(stagingBuffer, stagingBufferMemory);
 	}
 
 
@@ -92,32 +68,29 @@ namespace LeMU
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
 
-		// Create empty buffer inside device(GPU)
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
 		device.createBuffer(
 			bufferSize,
-			VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,	
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer,
+			stagingBufferMemory);
+
+		copyHostMemToDeviceMem(stagingBufferMemory, bufferSize, indices.data());
+
+		device.createBuffer(
+			bufferSize,
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			indexBuffer,
 			indexBufferMemory);
 
-		// the purpose of the code below is mapping data from CPU to GPU
+		device.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
-		void* data;	// empty buffer in host(CPU)
-
-		// map memory on host(void *data) to device memory(indexBufferMemory)
-		vkMapMemory(device.device(), indexBufferMemory, 0, bufferSize, 0, &data);
-
-		// write index buffer data into host(void *data)
-		// meanwhile, these data will be flushed to device memory
-		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-
-		// once all data has been writtern, 
-		// no longer need the  region of data in host side,
-		// unmap the indexBufferMemory
-		// region on the host side will be deleted
-		vkUnmapMemory(device.device(), indexBufferMemory);
+		deleteBuffer(stagingBuffer, stagingBufferMemory);
 	}
-
 
 
 	void Model::bind(VkCommandBuffer commandBuffer)
@@ -129,6 +102,7 @@ namespace LeMU
 		if (hasIndexBuffer)
 			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 	}
+
 
 	void Model::draw(VkCommandBuffer commandBuffer)
 	{
@@ -168,6 +142,29 @@ namespace LeMU
 		return attributeDescriptions;
 	}
 
-}
- 
 
+	void Model::deleteBuffer(VkBuffer buffer, VkDeviceMemory deviceMemory)
+	{
+		vkDestroyBuffer(device.device(), buffer, nullptr);
+		vkFreeMemory(device.device(), deviceMemory, nullptr);
+	}
+
+
+	void Model::copyHostMemToDeviceMem(VkDeviceMemory deviceMemory, VkDeviceSize memSize, const void* source)
+	{
+		void* data;
+
+		// map memory on host to device memory
+		vkMapMemory(device.device(), deviceMemory, 0, memSize, 0, &data);
+
+		// write index buffer data into host(void *data)
+		// meanwhile, these data will be flushed to device memory
+		memcpy(data, source, static_cast<size_t>(memSize));
+
+		// once all data has been writtern, 
+		// no longer need the  region of data in host side,
+		// unmap the indexBufferMemory
+		// region on the host side will be deleted
+		vkUnmapMemory(device.device(), deviceMemory);
+	}
+}
