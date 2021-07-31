@@ -53,8 +53,8 @@ namespace LeMU {
 
     void RenderSystem::createPipeline(VkRenderPass renderPass)
     {
-        assert(swapChain != nullptr && "Cannot create pipeline before swap chain");
-        assert(swapChain != nullptr && "Cannot create pipeline before pipeline layout");
+        //assert(swapChain != nullptr && "Cannot create pipeline before swap chain");
+        //assert(swapChain != nullptr && "Cannot create pipeline before pipeline layout");
 
         PipelineConfigInfo pipelineConfig{};
         Pipeline::defaultPipelineConfigInfo(pipelineConfig);

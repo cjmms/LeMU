@@ -1,3 +1,5 @@
+
+
 #include "App.hpp"
 
 #include "KeyboardController.hpp"
@@ -9,6 +11,7 @@
 #include <glm.hpp>
 #include <gtc/constants.hpp>
 #include "RenderSystem.hpp"
+#include "Image.hpp"
 
 // std
 #include <array>
@@ -43,6 +46,8 @@ namespace LeMU {
 
         // Kayboard Controller
         KeyboardController cameraController{};
+
+        Image image("statue.jpg", device);
 
         while (!window.shouldClose()) {
             glfwPollEvents();

@@ -1,8 +1,5 @@
 #pragma once
 
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 #include "Device.hpp"
 
 
@@ -11,7 +8,10 @@ namespace LeMU
 	class Image 
 	{
 	public:
-		void loadImage();
+		Image(const std::string& textureName, Device &device);
+
+		
+	private:
 
 		void createImage(
 			VkFormat format,
@@ -19,12 +19,17 @@ namespace LeMU
 			VkImageUsageFlags usage,
 			VkMemoryPropertyFlags properties);
 
+		void transitionImageLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
-	private:
+		void copyBufferToImage(VkBuffer buffer);
+
+		void loadToStagingBuffer(const std::string& textureName);
 
 		Device &device;
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;
+
+		
 
 		int width, height;
 	};
