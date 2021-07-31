@@ -14,7 +14,7 @@ namespace LeMU
 		:device(device)
 	{
 		loadToStagingBuffer(textureName);
-		/*
+		
 		createImage(VK_FORMAT_R8G8B8A8_SRGB,
 					VK_IMAGE_TILING_OPTIMAL,
 					VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -23,16 +23,27 @@ namespace LeMU
 		transitionImageLayout(	VK_FORMAT_R8G8B8A8_SRGB,				// format 
 								VK_IMAGE_LAYOUT_UNDEFINED,				// old layout
 								VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);	// new layout
-	*/
-		//copyBufferToImage(stagingBuffer);
+	
+		copyBufferToImage(stagingBuffer);
 
-		/*transitionImageLayout(	VK_FORMAT_R8G8B8A8_SRGB, 
+		transitionImageLayout(	VK_FORMAT_R8G8B8A8_SRGB, 
 								VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
 								VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);	// easy for shader to access
-								*/
-		//vkDestroyBuffer(device.device(), stagingBuffer, nullptr);
-		//vkFreeMemory(device.device(), stagingBufferMemory, nullptr);
+								
+		vkDestroyBuffer(device.device(), stagingBuffer, nullptr);
+		vkFreeMemory(device.device(), stagingBufferMemory, nullptr);
 	}
+
+
+
+	Image::~Image()
+	{
+		vkDestroyImageView(device.device(), textureImageView, nullptr);
+
+		vkDestroyImage(device.device(), textureImage, nullptr);
+		vkFreeMemory(device.device(), textureImageMemory, nullptr);
+	}
+
 
 
 
@@ -45,9 +56,6 @@ namespace LeMU
 
 		if (!pixels) 
 			throw std::runtime_error("failed to load texture image! " + std::string(" ") + stbi_failure_reason());
-
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
 		
 		device.createBuffer(imageSize,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -207,5 +215,32 @@ namespace LeMU
 	}
 
 
+	void Image::createTextureImageView()
+	{
+		textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, device.device());
+	}
+
+
+
+	VkImageView createImageView(VkImage image, VkFormat format, const VkDevice& device)
+	{
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = image;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		VkImageView imageView;
+
+		if (vkCreateImageView(device, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
+			throw std::runtime_error("failed to create texture image view!");
+
+		return imageView;
+	}
 }
 
