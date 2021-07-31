@@ -97,6 +97,7 @@ namespace LeMU {
     {
         assert(!isFrameStarted && "Can't call beginFrame while already in progress");
 
+        // check if the next framebuffer is ready to render
         auto result = swapChain->acquireNextImage(&currentImageIndex);
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR)

@@ -195,6 +195,11 @@ namespace LeMU {
         VkCommandPoolCreateInfo poolInfo = {};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+
+        // VK_COMMAND_POOL_CREATE_TRANSIENT_BIT: 
+        // command buffer will have low life cycle ( single frame / single queue submission )
+        // VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT:
+        // command buffer in the pool can be individually reset
         poolInfo.flags =
             VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
@@ -313,6 +318,7 @@ namespace LeMU {
         }
     }
 
+    // enumerate all extensions and check if all required extensions are among them
     bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
