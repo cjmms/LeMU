@@ -38,6 +38,9 @@ namespace LeMU
 
 	Image::~Image()
 	{
+		vkDestroySampler(device.device(), textureSampler, nullptr);
+		vkDestroyImageView(device.device(), textureImageView, nullptr);
+
 		vkDestroyImageView(device.device(), textureImageView, nullptr);
 
 		vkDestroyImage(device.device(), textureImage, nullptr);
@@ -218,6 +221,49 @@ namespace LeMU
 	void Image::createTextureImageView()
 	{
 		textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, device.device());
+	}
+
+
+	void Image::createTextureSampler()
+	{
+		VkSamplerCreateInfo samplerInfo{};
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+
+		// bilinear filtering for both oersampling and undersampling
+		samplerInfo.magFilter = VK_FILTER_LINEAR;	
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+
+		// Repeat the texture when going beyond the image dimensions.
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+		// Enable anisotropic filtering
+		samplerInfo.anisotropyEnable = VK_TRUE;
+
+		VkPhysicalDeviceProperties properties{};
+		vkGetPhysicalDeviceProperties(device.getPhysicalDevice(), &properties);
+		// boost to max base on physical device
+		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+
+		// pick outside the image, and clamping, returns black
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+
+		// always false, otherwise UV will be in the range of [0, width]
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+
+		// defines how to compare texels, used for PCF
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipLodBias = 0.0f;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 0.0f;
+
+		if (vkCreateSampler(device.device(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create texture sampler!");
+		}
 	}
 
 

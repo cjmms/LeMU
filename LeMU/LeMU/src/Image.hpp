@@ -10,9 +10,7 @@ namespace LeMU
 	public:
 		Image(const std::string& textureName, Device &device);
 		~Image();
-		
-
-		
+	
 
 	private:
 
@@ -30,6 +28,8 @@ namespace LeMU
 
 		void loadToStagingBuffer(const std::string& textureName);
 
+		void createTextureSampler();
+
 		Device &device;
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;
@@ -38,6 +38,7 @@ namespace LeMU
 		VkDeviceMemory stagingBufferMemory;
 
 		VkImageView textureImageView;
+		VkSampler textureSampler;
 
 		int width, height;
 	};
