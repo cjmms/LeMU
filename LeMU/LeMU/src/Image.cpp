@@ -39,7 +39,7 @@ namespace LeMU
 	Image::~Image()
 	{
 		vkDestroySampler(device.device(), textureSampler, nullptr);
-		vkDestroyImageView(device.device(), textureImageView, nullptr);
+		vkDestroyImageView(device.device(), textureImageView, nullptr); 
 
 		vkDestroyImageView(device.device(), textureImageView, nullptr);
 

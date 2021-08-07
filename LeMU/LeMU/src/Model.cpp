@@ -2,6 +2,10 @@
 
 #include <cassert>
 #include <cstring>
+#include <iostream>
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "../tiny_obj_loader.h"
 
 namespace LeMU
 {
@@ -167,4 +171,78 @@ namespace LeMU
 		// region on the host side will be deleted
 		vkUnmapMemory(device.device(), deviceMemory);
 	}
+
+
+
+
+	std::unique_ptr<Model> Model::createModelFromFile(Device& device, const std::string& filePath)
+	{
+		Builder builder{};
+
+		std::cout << "Start loading Model, model path: " << filePath << std::endl;
+
+		builder.loadModel(filePath);
+
+		std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
+
+		return std::make_unique<Model>(device, builder);
+	}
+
+
+	// this function is based on model loader file: tiny_obj_loader.h
+	void Model::Builder::loadModel(const std::string& filePath)
+	{
+		tinyobj::attrib_t attrib;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::string warn, err;
+
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath.c_str()))
+		{
+			throw std::runtime_error(warn + err);
+		}
+
+		vertices.clear();
+		indices.clear();
+
+		for (const auto &shape: shapes)
+		{
+			for (const auto& index : shape.mesh.indices)
+			{
+				Vertex vertex{};
+
+				// vertex position
+				if (index.vertex_index >= 0)
+				{
+					vertex.position = {
+						attrib.vertices[3 * index.vertex_index + 0],
+						attrib.vertices[3 * index.vertex_index + 1],
+						attrib.vertices[3 * index.vertex_index + 2]
+					};
+				}
+
+				// vertex normal
+				if (index.normal_index >= 0)
+				{
+					vertex.normal = {
+						attrib.vertices[3 * index.normal_index + 0],
+						attrib.vertices[3 * index.normal_index + 1],
+						attrib.vertices[3 * index.normal_index + 2]
+					};
+				}
+
+				// vertex uv
+				if (index.texcoord_index >= 0)
+				{
+					vertex.uv = {
+						attrib.vertices[2 * index.texcoord_index + 0],
+						attrib.vertices[2 * index.texcoord_index + 1]
+					};
+				}
+
+				vertices.push_back(vertex);
+			}
+		}
+	}
+
 }

@@ -6,6 +6,7 @@
 #include <glm.hpp>
 
 #include <vector>
+#include <memory>
 #include "Device.hpp"
 
 namespace LeMU
@@ -22,6 +23,8 @@ namespace LeMU
 		{
 			glm::vec3 position;
 			glm::vec3 color;
+			glm::vec3 normal;
+			glm::vec2 uv;
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescription();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
@@ -31,6 +34,8 @@ namespace LeMU
 		{
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
+
+			void loadModel(const std::string& filePath);
 		};
 
 
@@ -43,6 +48,9 @@ namespace LeMU
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
+
+		// a helper funtion that creates model object returns unique ptr
+		static std::unique_ptr<Model> createModelFromFile(Device &device, const std::string& filePath);
 
 
 	private:
