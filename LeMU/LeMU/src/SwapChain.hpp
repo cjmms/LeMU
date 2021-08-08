@@ -42,6 +42,7 @@ namespace LeMU {
 
         bool compareSwapFormats(const SwapChain& swapChain) const;
 
+        
 
     private:
         void init();
@@ -50,6 +51,7 @@ namespace LeMU {
         void createDepthResources();
         void createRenderPass();
         void createFramebuffers();
+        void createUniformBuffer();
         void createSyncObjects();
 
         // Helper functions
@@ -83,6 +85,9 @@ namespace LeMU {
         std::vector<VkFence> inFlightFences;
         std::vector<VkFence> imagesInFlight;
         size_t currentFrame = 0;
+
+        std::vector<VkBuffer> uniformBuffers;
+        std::vector<VkDeviceMemory> uniformBufferMemory;
     };
 
 }  // namespace lve

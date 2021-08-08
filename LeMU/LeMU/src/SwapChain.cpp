@@ -2,6 +2,7 @@
 
 
 #include "Image.hpp"
+#include "Descriptor.hpp"
 
 // std
 #include <array>
@@ -38,6 +39,7 @@ namespace LeMU {
         createDepthResources();
         createFramebuffers();
         createSyncObjects();
+        createUniformBuffer();
     }
 
 
@@ -70,6 +72,12 @@ namespace LeMU {
             vkDestroySemaphore(device.device(), renderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(device.device(), imageAvailableSemaphores[i], nullptr);
             vkDestroyFence(device.device(), inFlightFences[i], nullptr);
+        }
+
+        for (size_t i = 0; i < swapChainImages.size(); i++)
+        {
+            vkDestroyBuffer(device.device(), uniformBuffers[i], nullptr);
+            vkFreeMemory(device.device(), uniformBufferMemory[i], nullptr);
         }
     }
 
@@ -428,5 +436,28 @@ namespace LeMU {
             VK_IMAGE_TILING_OPTIMAL,
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
     }
+
+
+
+    void SwapChain::createUniformBuffer()
+    {
+        VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+        uniformBuffers.resize(swapChainImages.size());
+        uniformBufferMemory.resize(swapChainImages.size());
+
+        for (size_t i = 0; i < swapChainImages.size(); i++)
+        {
+            device.createBuffer(
+                bufferSize,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                uniformBuffers[i],
+                uniformBufferMemory[i]);
+        }
+    }
+
+
+
 
 }  // namespace lve
