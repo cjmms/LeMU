@@ -84,14 +84,14 @@ namespace LeMU {
 
     void FirstApp::loadGameObjects()
     {
-        std::shared_ptr<Model> model = Model::createModelFromFile(device, "models/cube.obj");
+        std::shared_ptr<Model> model = Model::createModelFromFile(device, "models/viking_room.obj");
 
-        auto cube = GameObject::createGameObject();
-        cube.model = model;
-        cube.transform.translation = { 0.0f, 0.0f, 2.5f };
-        cube.transform.scale = { 0.5f, 0.5f, 0.5f };
+        auto obj = GameObject::createGameObject();
+        obj.model = model;
+        obj.transform.translation = { 0.0f, 0.0f, 2.5f };
+        obj.transform.scale = {3.0f};
 
-        gameObjects.push_back(std::move(cube));
+        gameObjects.push_back(std::move(obj));
     }
 
 
