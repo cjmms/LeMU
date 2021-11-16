@@ -1,5 +1,5 @@
-
-#include "App.hpp"
+#include "pch.h"
+//#include "App.hpp"
 
 // std
 #include <cstdlib>
@@ -16,14 +16,15 @@ int main() {
         //throw std::runtime_error("fuck you" + std::string(" ") + stbi_failure_reason());
 
     
-    LeMU::FirstApp app{};
+   // LeMU::FirstApp app{};
 
     try {
-        app.run();
+   //     app.run();
+        std::cout << "rgreg" << std::endl;
     }
     catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
-        return EXIT_FAILURE;
+     //   std::cerr << e.what() << '\n';
+     //   return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;

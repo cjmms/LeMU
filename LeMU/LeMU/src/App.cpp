@@ -1,4 +1,4 @@
-
+#include "pch.h"
 
 #include "App.hpp"
 
@@ -89,7 +89,7 @@ namespace LeMU {
         auto obj = GameObject::createGameObject();
         obj.model = model;
         obj.transform.translation = { 0.0f, 0.0f, 2.5f };
-        obj.transform.scale = {3.0f};
+        obj.transform.scale = {3.0f, 3.0, 3.0};
 
         gameObjects.push_back(std::move(obj));
     }
