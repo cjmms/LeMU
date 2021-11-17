@@ -1,31 +1,37 @@
 #include "pch.h"
-//#include "App.hpp"
 
-// std
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+
+struct ShaderModule
+{
+    std::vector<unsigned int> SPIRV;
+    VkShaderModule shaderModule;
+};
+
+
+
+size_t CompileShader(glslang_stage_t stage, const char* shaderSource, ShaderModule& shaderModule)
+{
+
+}
+
 
 int main() {
 
-    //int width, height, nrChannels;
-    //unsigned char* data = stbi_load("textures/texture.jpg", &width, &height, &nrChannels, 3);
+    // simple lambda to catch potential errors
+    glfwSetErrorCallback(
+        [](int error, const char* description) 
+        {
+            fprintf(stderr, "Error: %s\n", description);    
+        }
+    );
 
-    //if (!data)
-      //  std::cout << stbi_failure_reason() << std::endl;
-        //throw std::runtime_error("fuck you" + std::string(" ") + stbi_failure_reason());
+    // GLFW init
+    if (!glfwInit()) exit(EXIT_FAILURE);
 
     
-   // LeMU::FirstApp app{};
+   
 
-    try {
-   //     app.run();
-        std::cout << "rgreg" << std::endl;
-    }
-    catch (const std::exception& e) {
-     //   std::cerr << e.what() << '\n';
-     //   return EXIT_FAILURE;
-    }
+    
 
     return EXIT_SUCCESS;
     
